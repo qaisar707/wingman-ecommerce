@@ -6,6 +6,7 @@ import Grid from "../components/ProductGrid";
 import SearchBar from "../components/SearchBar";
 import Modal from "../components/CardDetailsModal";
 import Pagination from "../components/Pagination";
+import Sorting from "../components/Sorting";
 import { useDebounce } from "../utils/hooks/useDebounce";
 import { useFilteredProducts } from "../utils/hooks/useFilterProducts";
 import { useProductHandlers } from "../utils/hooks/useProductHandlers";
@@ -19,6 +20,7 @@ const Home: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState<string>("default");
   const productsPerPage = 8;
 
   const debouncedQuery = useDebounce(searchQuery, 300);
@@ -27,7 +29,7 @@ const Home: React.FC = () => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  const filteredProducts = useFilteredProducts(products, debouncedQuery);
+  const filteredProducts = useFilteredProducts(products, debouncedQuery, sortOption);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -40,12 +42,16 @@ const Home: React.FC = () => {
     setSelectedProduct
   );
 
+  const handleSortChange = (option: string) => {
+    setSortOption(option);
+  };
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <SearchBar onSearch={handleSearch} />
-        <br />
         <h1 className="text-2xl font-bold text-gray-900 mb-8">E-commerce Product Catalog</h1>
+        <SearchBar onSearch={handleSearch} />
+        <Sorting sortOption={sortOption} onSortChange={handleSortChange} />
         {loading && <div className="text-center py-16">Loading...</div>}
         {error && <div className="text-center py-16 text-red-500">{error}</div>}
         {!loading && !error && filteredProducts.length === 0 && debouncedQuery.trim() !== "" && (
